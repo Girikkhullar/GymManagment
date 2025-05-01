@@ -31,14 +31,20 @@
 
         <script>
             function login() {
-                var name = document.getElementById("naam").value;
-                var pass = document.getElementById("pass").value;
+              
+                var pass = document.getElementById("opassword").value;
+                var email = document.getElementById("oemail").value;
+                 
+               
 
                 var formdata = new FormData();
-                formdata.append("name", name);
+                 
                 formdata.append("pass", pass);
+                formdata.append("email", email);
+                
 
-                var url = "/adminLogin";    
+
+                var url = "/ownerlogin";    
                 fetch(url, {method: "POST", body: formdata})
                         .then(response => response.text())
                         .then(ans => renderAsHtml(ans));
@@ -47,7 +53,9 @@
             function renderAsHtml(ans) {
                 console.log(ans)
                 if (ans === "success") {
-                    alert(ans);
+                    window.location.href="/OwnerHome";
+                            
+                            
                 } else
                 {
                     alert(ans);
@@ -309,17 +317,17 @@
                             <!--Login Form-->
                             <div class="styled-form login-form">
                                 <form method="post" action="https://expert-themes.com/html/gym/index.html">
-                                    <div class="form-group">
-                                        <span class="adon-icon"><span class="fa fa-user"></span></span>
-                                        <input type="text" name="username" id="naam" value="" placeholder="Your Name *">
-                                    </div>
+                                    <div class="mb-3">
+                                            <label for="oemail" class="form-label"><i class="fa fa-envelope me-2"></i>Owner Email Address</label>
+                                            <input type="email" class="form-control" name="useremil" id="oemail" placeholder="Enter your email *">
+                                        </div>
                                     <!--                            <div class="form-group">
                                                                     <span class="adon-icon"><span class="fa fa-envelope-o"></span></span>
                                                                     <input type="email" name="useremil" id="em" value="" placeholder="Emai Address*">
                                                                 </div>-->
                                     <div class="form-group">
                                         <span class="adon-icon"><span class="fa fa-unlock-alt"></span></span>
-                                        <input type="password" name="userpassword" id="pass" value="" placeholder="Enter Password">
+                                        <input type="password" name="userpassword" id="opassword" value="" placeholder="Enter Password">
                                     </div>
                                     <div class="clearfix">
                                         <div class="form-group pull-left">

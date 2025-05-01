@@ -68,7 +68,7 @@ public class AdminRestController {
 
     @GetMapping("/getcities")
     public String getcities() {
-        String ans = new RDBMS_TO_JSON().generateJSON("select * from adminmanagecity");
+        String ans = new RDBMS_TO_JSON().generateJSON("select * from adminmanagecities");
         return ans;
     }
 
@@ -77,7 +77,7 @@ public class AdminRestController {
         try {
             int myid = Integer.parseInt(id);
 
-            ResultSet rs = DbLoader.executeQuery("SELECT * FROM adminmanagecity WHERE id = " + myid);
+            ResultSet rs = DbLoader.executeQuery("SELECT * FROM adminmanagecities WHERE id = " + myid);
             if (rs.next()) {
                 rs.deleteRow();
                 return "success";
@@ -129,40 +129,6 @@ public class AdminRestController {
     }
     
     
-     @PostMapping("/ownermanagegym")
-    public String ownermanagegym(@RequestParam String gymname, @RequestParam String address, @RequestParam String latitude, @RequestParam String longitude, @RequestParam String ameneties, @RequestParam String myDropdown, @RequestParam MultipartFile photo) {
-
-        try {
-            ResultSet rs = DbLoader.executeQuery("select * from ownergym where gymname='" + gymname + "'");
-            if (rs.next()) {
-                return "fail";
-            } else {
-                String projectPath = System.getProperty("user.dir");
-                String internalPath = "/src/main/resources/static";
-                String folderName = "/myUploads";
-                String orgName = "/" + photo.getOriginalFilename();
-                FileOutputStream fos = new FileOutputStream(projectPath + internalPath + folderName + orgName);
-
-                byte[] b1 = photo.getBytes();
-
-                fos.write(b1);
-                fos.close();
-                rs.moveToInsertRow();
-                rs.updateString("gymname", gymname);
-                rs.updateString("Address", address);
-                rs.updateString("ogcity", myDropdown);
-                rs.updateString("latitude", latitude);
-                rs.updateString("longitude", longitude);
-                rs.updateString("Amenities", ameneties);
-                rs.updateString("ogphoto", orgName);
-                rs.insertRow();
-                return "Added Successfully";
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return ex.toString();
-        }
-
-    }
+   
 }
 

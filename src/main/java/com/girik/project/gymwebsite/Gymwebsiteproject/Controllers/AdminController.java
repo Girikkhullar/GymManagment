@@ -25,33 +25,11 @@ public class AdminController {
     {
         return "AdminManageCities";
     }
-    @GetMapping("/osignup")
-    public String osignup()
-    {
-        return "OwnerSignUp";
-    }
+   
     @GetMapping("/amanageowner")
     public String amanageowner()
     {
         return "AdminManageOwner";
     }
-    @GetMapping("/ologin")
-    public String ologin()
-    {
-        return "Ownerlogin";
-    }
-    @GetMapping("/ohome")
-    public String ohome()
-    {
-        return "Ownerhome";
-    }
-    @GetMapping("/oManageGym")
-    public String oManageGym()
-    {
-        return "OwnerManageGym";
-    }
-    
-    
-    
-    
+
 }
