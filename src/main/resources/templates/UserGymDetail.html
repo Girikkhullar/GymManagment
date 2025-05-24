@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html>
+
+    <!-- Mirrored from expert-themes.com/html/gym/portfolio-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 15 Apr 2025 10:33:05 GMT -->
+    <head>
+        <meta charset="utf-8">
+        <title>User Gym Detail</title>
+        <!-- Stylesheets -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+
+        <link href="css/style.css" rel="stylesheet">
+        <link href="css/responsive.css" rel="stylesheet">
+
+        <!-- Color Switcher Mockup -->
+        <link href="css/color-switcher-design.css" rel="stylesheet">
+
+        <!-- Color Themes -->
+        <link id="theme-color-file" href="css/color-themes/default-theme.css" rel="stylesheet">
+
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&amp;family=Roboto:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+
+        <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+        <link rel="icon" href="images/favicon.png" type="image/x-icon">
+
+        <!-- Responsive -->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+        <!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
+        <!--[if lt IE 9]><script src="js/respond.js"></script><![endif]-->
+        <style>
+            .pricing-block {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+
+            .inner-box {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 100%;
+                padding: 20px;
+                background-size: cover;
+                background-position: center;
+                box-sizing: border-box;
+            }
+
+            .price-list {
+                margin-top: auto; /* Push the button section to the bottom */
+            }
+
+            .btn-one-outer {
+                margin-top: 20px;
+            }
+
+
+        </style>
+        <script>
+            var urlParams = new URLSearchParams(window.location.search);
+            var uid = urlParams.get('id');
+            var gid = urlParams.get('id');
+            function usergymdetail() {
+                var formdata = new FormData();
+                formdata.append("uid", uid);
+                formdata.append("gid", gid);
+                var url = "/usergymdetails";
+                fetch(url, {method: "POST", body: formdata})
+                        .then(response => response.text())
+                        .then(ans => renderAsHtml(ans));
+
+            }
+            function renderAsHtml(ans) {
+                console.log(ans);
+                var mainobj = JSON.parse(ans);
+                var arr = mainobj["ans"];
+                console.log(arr);
+                var ct = arr[0];
+                var amenitiesList = ct.Amenities.split(",");
+                var amenitiesHTML = '<ul class="list-style-two">';
+                for (var j = 0; j < amenitiesList.length; j++) {
+                    var amenity = amenitiesList[j].trim();
+                    amenitiesHTML += `<li><i class=" " style="color:red; margin-right:6px;"></i>${amenity}</li>`;
+                }
+                amenitiesHTML += '</ul>';
+
+                var p = `
+    <div class="content-column col-lg-8 col-md-12 col-sm-12">
+        <div class="inner-column">
+            <h3>Our Training Tips</h3>
+            ${amenitiesHTML}
+           
+        </div>
+    </div>`;
+
+                document.getElementById("amen").innerHTML = p;
+                document.getElementById("addr").innerHTML = ct.Address;
+                document.getElementById("photo").src = "myuploads/" + ct.ogphoto;
+
+                // Get coordinates and update iframe
+                var lat = ct.latitude;
+                var lng = ct.longitude;
+
+                document.getElementById("gmap_canvas").src = "https://maps.google.com/maps?q=" + lat + "," + lng + "&ie=UTF8&iwloc=&output=embed";
+
+            }
+
+            function getpackagedetails() {
+
+                var url = "/getpackagedetails?id=" + gid;
+                fetch(url)
+                        .then(response => response.text())
+                        .then(ans => renderPackage(ans));
+            }
+            function renderPackage(ans) {
+                console.log(ans);
+                var mainobj = JSON.parse(ans);
+                var arr = mainobj["ans"];
+                console.log(arr);
+
+                var p = "";
+                for (var j = 0; j < arr.length; j++) {
+                    var s = arr[j];
+                    var inclusionList = s.inclusion.split(",");
+                    var inclusionHTML = '<ul class="price-list">';
+
+                    for (var i = 0; i < inclusionList.length; i++) {
+                        var inclusion = inclusionList[i].trim();
+                        inclusionHTML += `<li>${inclusion}</li>`;
+                    }
+                    inclusionHTML += '</ul>';
+
+                    p += `
+            <div class="pricing-block col-lg-4 col-md-6 col-sm-12">
+                <div class="inner-box" style="background-image:url(images/resource/price-1.jpg)">
+                    <h4>${s.pname}</h4>
+                   
+                    <div class="price">For ${s.duration} Days <span>Rs. ${s.pprice}</span></div>
+                    ${inclusionHTML}
+                    
+                        
+                           <div class="btn-two-outer"> <button onclick="usershowpackagedetail(${s.id})" class="theme-btn btn-style-two" type="submit" name="submit-form"><span class="txt">Select</span></button></div>
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+                }
+
+
+                document.getElementById("ugd1").innerHTML = p;
+
+            }
+
+            function usershowpackagedetail(id)
+            {
+                window.location.href = "/usershowgympackage?id=" + id;
+            }
+            document.addEventListener("DOMContentLoaded", function () {
+                usergymdetail();
+                getpackagedetails();
+
+                userShowRatings();
+                averageRating();
+            });
+
+
+
+
+            var xhr = new XMLHttpRequest();
+            function review()
+            {
+                $("#myModal1").modal("show");
+            }
+
+            var n = 0;
+            function fill(obj)
+            {
+                var img = obj.src;
+                var id = obj.id;
+                var val = parseInt(id.substring(id.indexOf("_") + 1));
+                var i;
+                if (n === 0)
+                {
+                    i = 1;
+                } else
+                {
+                    i = n + 1;
+                }
+                for (; i <= 5; i++)
+                {
+                    if (i <= val)
+                    {
+                        document.getElementById("rating_" + i).src = "rating/filled_star.png";
+
+                    } else
+                    {
+                        document.getElementById("rating_" + i).src = "rating/empty_star.png";
+                    }
+                }
+
+            }
+            function selected(obj)
+            {
+                var id = obj.id;
+                var val = parseInt(id.substring(id.indexOf("_") + 1));
+                n = val;
+            }
+            function unfill(obj)
+            {
+                var i;
+                if (n === 0)
+                {
+                    i = 1;
+                } else
+                {
+                    i = n + 1;
+                }
+                for (; i <= 5; i++)
+                {
+                    document.getElementById("rating_" + i).src = "rating/empty_star.png";
+                }
+            }
+
+
+            function addreview()
+            {
+
+                var comment = document.getElementById("comment").value;
+
+
+                var url = "./userAddReview?gid=" + gid + "&rating=" + n + "&comment=" + comment;
+
+                fetch(url).then(response => response.text())
+                        .then(ans => renderAddReviewResponse(ans));
+
+
+            }
+
+            function renderAddReviewResponse(ans) {
+                alert(ans);
+                userShowRatings();
+                averageRating();
+            }
+
+            function userShowRatings() {
+
+                //1. Make object of XMLHttpRequest
+                var xhttp = new XMLHttpRequest();
+
+                //4. Receive XMLHttpResponse from server & use ans
+
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var res = this.responseText;
+                        res = res.trim();
+                        var mainobj = JSON.parse(res);
+                        var arr = mainobj["ans"];
+
+                        var ren = "";
+
+                        for (var i = 0; i < arr.length; i++)
+                        {
+                            var st = arr[i];
+                            ren += "<div class=\"row\" >";
+
+                            ren += "<div class= \"col-sm-3\" style=\"text-align: center\" >";
+                            ren += "<div class=\"card-body\">";
+                            for (var j = 0; j < st.rating; j++) {
+                                ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/filled_star.png\" >";
+                            }
+                            for (var j = st.rating; j < 5; j++) {
+                                ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/empty_star.png\" >";
+                            }
+                            ren += "</div>";
+                            ren += "</div>";
+
+                            ren += "<div class= \"col-sm-6\" style=\"text-align: center\" >";
+                            ren += "<div class=\"card-body\">";
+                            ren += "<label class=\"card-text text-alli\" style=\"font-size: 16px;text-align: center;color: #005b9a\" ><b>Comment : </b><br>" + st.comment + "</label><br><br>";
+                            ren += "</div>";
+                            ren += "</div>";
+
+                            ren += "<div class= \"col-sm-3\" style=\"text-align: center\" >";
+                            ren += "<div class=\"card-body\">";
+                            ren += "<label class=\"card-text text-alli\" style=\"font-size: 16px;text-align: center;color: #005b9a\" ><b>User Email : </b><br>" + st.user_email + "</label><br><br>";
+                            ren += "</div>";
+                            ren += "</div>";
+                            ren += "</div>";
+
+                        }
+
+                        document.getElementById("showratings").innerHTML = ren;
+                        averageRating();
+                    }
+                };
+                //2. Prepare request (Define target --> servlet)
+                xhttp.open("GET", "./userShowRatings?gid=" + gid, true);
+
+                //3. Send Request
+                xhttp.send();
+            }
+
+            function averageRating() {
+                //1. Make object of XMLHttpRequest
+                var xhttp = new XMLHttpRequest();
+
+                //4. Receive XMLHttpResponse from server & use ans
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var res = this.responseText;
+                        res = res.trim();
+//                        alert(res);
+                        var mainobj = JSON.parse(res);
+                        var arr = mainobj["ans"];
+
+                        var ren = "";
+
+                        var st = arr[0];
+                        var rating2 = st.r1;
+                        var getdecimal = rating2.toString().split(".")[1];
+                        if (parseInt(getdecimal) == 0) {
+                            ren += "<div class= \"col-sm-12\" style=\"text-align: center\" >";
+                            ren += "<div class=\"card-body\">";
+                            for (var j = 0; j < st.r1; j++) {
+                                ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/filled_star.png\" >";
+                            }
+                            for (var j = st.r1; j < 5; j++) {
+                                ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/empty_star.png\" >";
+                            }
+                            ren += "</div>";
+                            ren += "</div>";
+                        } else {
+                            ren += "<div class= \"col-sm-12\" style=\"text-align: center\" >";
+                            ren += "<div class=\"card-body\">";
+                            for (var j = 0; j < st.r1 - 1; j++) {
+                                ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/filled_star.png\" >";
+                            }
+                            ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/download.jpg\" >";
+                            for (var j = st.r1; j < 4; j++) {
+                                ren += "<img class=\"img-thumbnail\" style=\"border: 2px solid black; border-radius: 10px;width: 20px; height: 20px\" src=\"rating/empty_star.png\" >";
+                            }
+                            ren += "</div>";
+                            ren += "</div>";
+                        }
+
+                        document.getElementById("averagerating").innerHTML = ren;
+                    }
+                };
+                //2. Prepare request (Define target --> servlet)
+                xhttp.open("GET", "./userShowAverageRatings?gid=" + gid, true);
+
+                //3. Send Request
+                xhttp.send();
+            }
+
+
+
+        </script>
+    </head>
+
+    <body class="hidden-bar-wrapper">
+
+        <div class="page-wrapper">
+
+            <!-- Preloader -->
+            <div class="preloader"></div>
+            <!-- Main Header-->
+
+            <div th:replace="UserHeader :: header"></div>
+
+            <!-- End Main Header -->
+
+            <!--Page Title-->
+            <section class="page-title" style="background-image:url(images/background/11.jpg)">
+                <div class="auto-container">
+                    <div class="clearfix">
+                        <div class="pull-left">
+                            <h2>See Gym Closely</h2>
+                            <div class="text">Fitness is not a destination it is a way of life.</div>
+                        </div>
+                        <div class="pull-right">
+                            <ul class="page-breadcrumb">
+                                <li><a href="/">home</a></li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!--End Page Title-->
+
+            <!-- Portfolio Detail Section -->
+            <section class="portfolio-detail-section">
+                <div class="auto-container">
+                    <div class="inner-box">
+                        <div class="image" >
+                            <img src="images/gallery/10.jpg" id="photo" alt="" />
+                        </div>
+                        <div class="row clearfix">
+
+                            <!-- Info Column -->
+                            <div class="info-column col-lg-4 col-md-12 col-sm-12">
+                                <div class="inner-column">
+                                    <h4>Gym Details</h4>
+                                    <div class="text" id="addr" >There are many variations of passages of Lorem available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don’t look even slightly but the majority have suffered alteration.</div>
+                                    <!--                                    <ul class="info-list">
+                                                                            <li><span>CLIENT</span>Nick</li>
+                                                                            <li><span>SERVICES</span>Personal</li>
+                                                                            <li><span>CATEGORIES</span>Fitness</li>
+                                                                            <li><span>YEAR</span>2025</li>
+                                                                        </ul>-->
+                                </div>
+                            </div>
+
+                            <!-- Content Column -->
+                            <div class="content-column col-lg-12 col-md-12 col-sm-12">
+                                <div class="inner-column">
+                                    <!--<h3>Our Training Tips</h3>-->
+                                    <div class="text" id="amen" ><p>Lorem ipsum proin gravida nibh vel velit auctor aliqunean sollicitudinlorem quis bibendum auci elit consequat ipsutis sem nibh id elit. Duis sed odio sit amet nibh vulputate cursus a sit amet mauris. Morbi accumsan ipsum velit. Nam nec tellus a odio tincidunt auctor a ornare odio.</p></div>
+                                    <!--                                    <ul class="list-style-two">
+                                                                            <li>Train with the best experts in bodybuilding field.</li>
+                                                                            <li>Fitness is about being better than the person you were yesterday.</li>
+                                                                            <li>Our personal trainers will help you find a perfect workout.</li>
+                                                                        </ul>-->
+                                    <h3>FUN WORKOUTS</h3>
+                                    <div class="text" id="description"><p>Who said workouts have to be boring? At our gym, fitness is fun! Join high-energy classes, challenge yourself with friendly competitions, or just vibe out with your workout crew. It’s not just about results — it’s about enjoying the journey</p></div><br>
+                                    <div class="row clearfix">
+
+                                        <!-- Column -->
+                                        <div class="column col-lg-6 col-md-6 col-sm-12">
+                                            <!-- Featured Block -->
+                                            <div class="featured-block">
+                                                <div class="block-inner">
+                                                    <span class="icon flaticon-man-1"></span>
+                                                    <strong>Expert Trainer</strong>
+                                                    <div class="feature-text">The class based sessions are challenging, innovative.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Column -->
+                                        <div class="column col-lg-6 col-md-6 col-sm-12">
+                                            <!-- Featured Block -->
+                                            <div class="featured-block">
+                                                <div class="block-inner">
+                                                    <span class="icon flaticon-people-1"></span>
+                                                    <strong>Modern Facility</strong>
+                                                    <div class="feature-text">mprove your body strength. Join our gym training’s.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- More Posts -->
+                        <div class="more-posts clearfix">
+                            <!--                            <div class="pull-left">
+                                                            <div class="btn-one-outer"><a href="#" class="theme-btn btn-style-one"><span class="txt">PREVIOUS</span></a></div>
+                                                        </div>-->
+                            <!--                            <div class="pull-right">
+                                                            <div class="btn-one-outer"><a href="#" class="theme-btn btn-style-one"><span class="txt">Next</span></a></div>
+                                                        </div>-->
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            <!-- End Portfolio Detail Section -->
+
+            <!-- Testimonial Section -->
+            <section class="testimonial-section">
+                <div class="auto-container">
+                    <div class="inner-container" style="background-image:url(images/background/5.jpg)">
+                        <div class="row clearfix">
+
+                            <!-- Title Column -->
+                            <div class="title-column col-lg-4 col-md-12 col-sm-12">
+                                <div class="inner-column">
+                                    <!-- Sec Title -->
+                                    <div class="sec-title light">
+                                        <div class="title">OUR TESTIMONIAL</div>
+                                        <h2>WHAT OUR CLIENTS <br> SAY ABOUT US</h2>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Testimonial Column -->
+                            <div class="testimonial-column col-lg-8 col-md-12 col-sm-12">
+                                <div class="inner-column">
+                                    <div class="single-item-carousel owl-carousel owl-theme">
+
+                                        <!-- Testimonial Block Two -->
+                                        <div class="testimonial-block-two">
+                                            <div class="inner-box">
+                                                <div class="upper-box">
+                                                    <div class="author-image">
+                                                        <img src="images/resource/author-5.jpg" alt="" />
+                                                    </div>
+                                                    <div class="title">Nutritionist</div>
+                                                    <h4>Mellisa Martinez</h4>
+                                                    <div class="rating">
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="quote-icon flaticon-right-quote"></div>
+                                                <div class="text">Omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et recusandae. </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Testimonial Block Two -->
+                                        <div class="testimonial-block-two">
+                                            <div class="inner-box">
+                                                <div class="upper-box">
+                                                    <div class="author-image">
+                                                        <img src="images/resource/author-5.jpg" alt="" />
+                                                    </div>
+                                                    <div class="title">Nutritionist</div>
+                                                    <h4>Mellisa Martinez</h4>
+                                                    <div class="rating">
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="quote-icon flaticon-right-quote"></div>
+                                                <div class="text">Omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et recusandae. </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Testimonial Block Two -->
+                                        <div class="testimonial-block-two">
+                                            <div class="inner-box">
+                                                <div class="upper-box">
+                                                    <div class="author-image">
+                                                        <img src="images/resource/author-5.jpg" alt="" />
+                                                    </div>
+                                                    <div class="title">Nutritionist</div>
+                                                    <h4>Mellisa Martinez</h4>
+                                                    <div class="rating">
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                        <span class="fa fa-star"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="quote-icon flaticon-right-quote"></div>
+                                                <div class="text">Omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et recusandae. </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- End Testimonial Section -->
+
+
+            <!-- Pricing Section -->
+            <section class="pricing-section">
+                <div class="image-layer" style="background-image:url(images/background/6.jpg)"></div>
+                <div class="auto-container">
+                    <!-- Sec Title -->
+                    <div class="sec-title light centered">
+                        <div class="title">Gym Package</div>
+                        <h2>Working hours <br> & Classes</h2>
+                    </div>
+                    <div class="row d-flex align-items-stretch" id="ugd1">
+
+                        <!-- Pricing Block -->
+                        <div class="pricing-block col-lg-4 col-md-6 col-sm-12">
+                            <div class="inner-box" style="background-image:url(images/resource/price-1.jpg)">
+                                <h4 id="pname">Basic Plan</h4>
+                                <div class="title" id="description">Here Goes Some Descripation</div>
+                                <div class="price" id="pi">For 1 Month<span id="pprice">$99</span></div>
+                                <ul class="price-list" id="inclusion">
+                                    <li>Free Hand</li>
+                                    <li>Gym Fitness</li>
+                                    <li>Weight Loss</li>
+                                    <li>Personal Trainer</li>
+                                </ul>
+                                <div class="btn-one-outer"><a href="#" class="theme-btn btn-style-one" type="submit"><span class="txt">Select Now</span></a></div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Block -->
+                        <div class="pricing-block col-lg-4 col-md-6 col-sm-12">
+                            <div class="inner-box" style="background-image:url(images/resource/price-2.jpg)">
+                                <h4>Standard Plan</h4>
+                                <div class="title">Here Goes Some Descripation</div>
+                                <div class="price">For 6 Month<span>$149</span></div>
+                                <ul class="price-list">
+                                    <li>Free Hand</li>
+                                    <li>Gym Fitness</li>
+                                    <li>Weight Loss</li>
+                                    <li>Personal Trainer</li>
+                                </ul>
+                                <div class="btn-one-outer"><a href="#" class="theme-btn btn-style-one" type="submit"><span class="txt">Select Now</span></a></div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Block -->
+                        <div class="pricing-block col-lg-4 col-md-6 col-sm-12">
+                            <div class="inner-box" style="background-image:url(images/resource/price-3.jpg)">
+                                <h4>Ultimate Plan</h4>
+                                <div class="title">Here Goes Some Descripation</div>
+                                <div class="price">For 1 Year<span>$249</span></div>
+                                <ul class="price-list">
+                                    <li>Free Hand</li>
+                                    <li>Gym Fitness</li>
+                                    <li>Weight Loss</li>
+                                    <li>Personal Trainer</li>
+                                </ul>
+                                <div class="btn-one-outer"><a href="#" class="theme-btn btn-style-one" type="submit"><span class="txt">Select Now</span></a></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            <!-- End Pricing Section -->
+
+
+            <div class="col-sm-12" style="text-align: center">
+                <input type="button" class="btn btn-success" value="ADD REVIEW"
+                       style="border-radius: 10px;text-shadow: 2px 2px 5px black;" onclick="review()" />
+
+            </div>
+
+
+            <h2 style="text-align: center" >Average Rating</h2>
+            <div id="averagerating" >
+
+            </div>
+            <h2 style="text-align: center" >All Ratings</h2>
+            <div id="showratings" >
+
+            </div>
+
+
+            <!-- Contact Map Section -->
+            <h2 style="text-align: center" class="h2-title" id="gymname2">Find Us on Google Maps :</h2>
+
+            <div class="main-contact-map-in">
+                <div class="mapouter"><div class="gmap_canvas">
+                        <iframe width="100%" height="100%" id="gmap_canvas" src="https://maps.google.com/maps?q=31.620845714165693,74.87710472375572&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://2yu.co">2yu</a><br><style>.mapouter{
+                                position:relative;
+                                text-align:right;
+                                height: 500px;
+                                width:100%;
+                                }</style><a href="https://embedgooglemap.2yu.co/">html embed google map</a><style>.gmap_canvas {
+                                overflow:hidden;
+                                background:none!important;
+                                height:100%;
+                                width:100%;
+                                }</style></div></div>
+            </div> 
+            <!-- End Contact Section -->
+
+
+            <div class="modal" id="myModal1" >
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header " style="background: yellowgreen;" >
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title" style="color: white;"> Add Review</h4>
+                        </div>
+                        <div class="modal-body " >
+                            <div>
+
+
+
+                                <div id="all">
+
+                                    <form action="" method="post" id="form1">
+                                        <table>
+                                            <tr> <label class="form-group"> Give Ratings..</label>
+                                            <td>
+                                                <img id="rating_1" src="rating/empty_star.png" onmouseover="fill(this);" onmouseout="unfill(this);" onclick="selected(this);" width="50px;" height="50px;">
+                                            </td>
+                                            <td>
+                                                <img id="rating_2" src="rating/empty_star.png" onmouseover="fill(this)" onmouseout="unfill(this)" onclick="selected(this)" width="50px;" height="50px;">
+                                            </td>
+                                            <td>
+                                                <img id="rating_3" src="rating/empty_star.png" onmouseover="fill(this)" onmouseout="unfill(this)" onclick="selected(this)" width="50px;" height="50px;">
+                                            </td>
+                                            <td>
+                                                <img id="rating_4" src="rating/empty_star.png" onmouseover="fill(this)" onmouseout="unfill(this)" onclick="selected(this)" width="50px;" height="50px;">
+                                            </td>
+                                            <td>
+                                                <img  id="rating_5" src="rating/empty_star.png" onmouseover="fill(this)" onmouseout="unfill(this)" onclick="selected(this)" width="50px;" height="50px;">
+                                            </td>
+                                            </tr>
+                                        </table>
+                                        <br>
+                                        <label> Write Comment : </label> <input style="border-radius: 20px;" type="text" id="comment"  class="form-group"/>
+                                        <input type="button" value="Submit" class="btn btn-primary"
+                                               style="border-radius: 10px;text-shadow: 2px 2px 5px black" onclick="addreview()" />
+                                        <label style="display: none;color: tomato;" id="label1">Please Select Any Rating</label>
+
+                                    </form>
+                                </div>
+
+                            </div>   
+                        </div>
+                    </div>
+                    <div class="modal-footer " style="background: yellowgreen;" >
+                        <button type="button" class="btn btn-default" style="border-radius: 10px;" data-dismiss="modal"  >Close</button>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+            <!-- Subscribe Section -->
+            <section class="subscribe-section">
+                <div class="auto-container">
+                    <div class="inner-container margin-bottom">
+                        <div class="pattern-layer" style="background-image:url(images/background/7.jpg)"></div>
+                        <div class="section-image" style="background-image:url(images/resource/newslatter.png)"></div>
+                        <div class="row clearfix">
+
+                            <!-- Title Column -->
+                            <div class="title-column col-lg-6 col-md-12 col-sm-12">
+                                <div class="inner-column">
+                                    <h3>Don’t miss any updates <br> Get subscribed!</h3>
+                                </div>
+                            </div>
+
+                            <!-- Form Column -->
+                            <div class="form-column col-lg-6 col-md-12 col-sm-12">
+                                <div class="inner-column">
+
+                                    <div class="newsletter-form">
+                                        <form method="post" action="https://expert-themes.com/html/gym/contact.html">
+                                            <div class="form-group">
+                                                <input type="email" name="email" value="" placeholder="Add your email ......" required="">
+                                                <button type="submit" class="theme-btn submit-btn"><span class="txt">Subscribe</span></button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- End Subscribe Section -->
+
+            <!-- Main Footer -->
+            <footer class="main-footer style-four" style="background-image:url(images/background/2.jpg)">
+                <div class="auto-container">
+                    <!-- Widgets Section -->
+                    <div class="widgets-section">
+                        <div class="row clearfix">
+
+                            <!-- Big Column -->
+                            <div class="big-column col-lg-6 col-md-12 col-sm-12">
+                                <div class="row clearfix">
+
+                                    <!--Footer Column-->
+                                    <div class="footer-column col-lg-6 col-md-6 col-sm-12">
+                                        <div class="footer-widget logo-widget">
+                                            <div class="logo">
+                                                <a href="index-2.html"><img src="images/footer-logo.png" alt="" /></a>
+                                            </div>
+                                            <div class="text">Gym Expert is a champ in providing its users with absolutely everything a fitness or gym site needs. consectetur adipiscing elit. Suspendisse interdum nulla eu posuere scelerisque.</div>
+                                            <div class="social-links">
+                                                <span>Follow on Socials </span>
+                                                <a href="#" class="fa fa-facebook"></a>
+                                                <a href="#" class="fa fa-twitter"></a>
+                                                <a href="#" class="fa fa-instagram"></a>
+                                                <a href="#" class="fa fa-linkedin"></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer Column -->
+                                    <div class="footer-column col-lg-6 col-md-6 col-sm-12">
+                                        <div class="footer-widget news-widget">
+                                            <h4>Latest Posts</h4>
+                                            <!-- Footer Column -->
+                                            <div class="widget-content">
+                                                <div class="post">
+                                                    <div class="thumb"><a href="blog-single.html"><img src="images/resource/post-thumb-3.jpg" alt=""></a></div>
+                                                    <h5><a href="blog-single.html">Your Future is Created by What You Do Today</a></h5>
+                                                    <span class="date">JUNE 21, 2023</span>
+                                                </div>
+
+                                                <div class="post">
+                                                    <div class="thumb"><a href="blog-single.html"><img src="images/resource/post-thumb-4.jpg" alt=""></a></div>
+                                                    <h5><a href="blog-single.html">How to Maximise Time Spent at The GYM.</a></h5>
+                                                    <span class="date">JUNE 21, 2019</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Big Column -->
+                            <div class="big-column col-lg-6 col-md-12 col-sm-12">
+                                <div class="row clearfix">
+
+                                    <!-- Footer Column -->
+                                    <div class="footer-column col-lg-6 col-md-6 col-sm-12">
+                                        <div class="footer-widget links-widget">
+                                            <h4>Our Services</h4>
+                                            <ul class="list-link">
+                                                <li><a href="#">Fat Burn</a></li>
+                                                <li><a href="#">Streching</a></li>
+                                                <li><a href="#">Weight Loss</a></li>
+                                                <li><a href="#">Self Defense</a></li>
+                                                <li><a href="#">Body Building</a></li>
+                                                <li><a href="#">Psycho Trainning</a></li>
+                                                <li><a href="#">Strength Trainning</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer Column -->
+                                    <div class="footer-column col-lg-6 col-md-6 col-sm-12">
+                                        <div class="footer-widget timing-widget">
+                                            <h4>Working Hours</h4>
+                                            <ul>
+                                                <li>Monday – Friday:<span>07:00 – 21:00</span></li>
+                                                <li>Saturday:<span>07:00 – 16:00</span></li>
+                                                <li>Sunday Closed</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Footer Bottom -->
+                    <div class="footer-bottom">
+                        <div class="copyright">Copyright 2023 Theme by expertthemes</div>
+                    </div>
+
+                </div>
+            </footer>
+
+            <!-- Sidebar Cart Item -->
+            <div class="xs-sidebar-group info-group">
+                <div class="xs-overlay xs-bg-black"></div>
+                <div class="xs-sidebar-widget">
+                    <div class="sidebar-widget-container">
+                        <div class="widget-heading">
+                            <a href="#" class="close-side-widget">
+                                X
+                            </a>
+                        </div>
+                        <div class="sidebar-textwidget">
+
+                            <!-- Sidebar Info Content -->
+                            <div class="sidebar-info-contents">
+                                <div class="content-inner">
+                                    <div class="logo">
+                                        <a href="index-2.html"><img src="images/logo.png" alt="" /></a>
+                                    </div>
+                                    <div class="content-box">
+                                        <h2>About Us</h2>
+                                        <p class="text">The argument in favor of using filler text goes something like this: If you use real content in the Consulting Process, anytime you reach a review point you’ll end up reviewing and negotiating the content itself and not the design.</p>
+                                        <a href="#" class="theme-btn btn-style-two"><span class="txt">Consultation</span></a>
+                                    </div>
+                                    <div class="contact-info">
+                                        <h2>Contact Info</h2>
+                                        <ul class="list-style-one">
+                                            <li><span class="icon fa fa-location-arrow"></span>Chicago 12, Melborne City, USA</li>
+                                            <li><span class="icon fa fa-phone"></span>(111) 111-111-1111</li>
+                                            <li><span class="icon fa fa-envelope"></span>Gym@gmail.com</li>
+                                            <li><span class="icon fa fa-clock-o"></span>Week Days: 09.00 to 18.00 Sunday: Closed</li>
+                                        </ul>
+                                    </div>
+                                    <!-- Social Box -->
+                                    <ul class="social-box">
+                                        <li class="facebook"><a href="#" class="fa fa-facebook-f"></a></li>
+                                        <li class="twitter"><a href="#" class="fa fa-twitter"></a></li>
+                                        <li class="linkedin"><a href="#" class="fa fa-linkedin"></a></li>
+                                        <li class="instagram"><a href="#" class="fa fa-instagram"></a></li>
+                                        <li class="youtube"><a href="#" class="fa fa-youtube"></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END sidebar widget item -->
+
+        </div>
+        <!--End pagewrapper-->
+
+        <!-- Color Palate / Color Switcher -->
+        <div class="color-palate">
+            <div class="color-trigger">
+                <i class="fa fa-gear"></i>
+            </div>
+            <div class="color-palate-head">
+                <h6>Choose Your Color</h6>
+            </div>
+            <div class="various-color clearfix">
+                <div class="colors-list">
+                    <span class="palate default-color active" data-theme-file="css/color-themes/default-theme.css"></span>
+                    <span class="palate green-color" data-theme-file="css/color-themes/green-theme.css"></span>
+                    <span class="palate olive-color" data-theme-file="css/color-themes/olive-theme.css"></span>
+                    <span class="palate orange-color" data-theme-file="css/color-themes/orange-theme.css"></span>
+                    <span class="palate purple-color" data-theme-file="css/color-themes/purple-theme.css"></span>
+                    <span class="palate teal-color" data-theme-file="css/color-themes/teal-theme.css"></span>
+                    <span class="palate brown-color" data-theme-file="css/color-themes/brown-theme.css"></span>
+                    <span class="palate redd-color" data-theme-file="css/color-themes/redd-color.css"></span>
+                </div>
+            </div>
+
+            <h5>Other Options</h5>
+            <ul class="rtl-version option-box"> <li class="rtl">RTL Version</li> <li>LTR Version</li> </ul>
+
+            <a href="#" class="purchase-btn">Purchase now $17</a>
+
+            <div class="palate-foo">
+                <span>You will find much more options for colors and styling in admin panel. This color picker is used only for demonstation purposes.</span>
+            </div>
+
+        </div>
+
+        <!-- Search Popup -->
+        <div class="search-popup">
+            <button class="close-search style-two"><span class="flaticon-multiply"></span></button>
+            <button class="close-search"><span class="flaticon-up-arrow-1"></span></button>
+            <form method="post" action="https://expert-themes.com/html/gym/blog.html">
+                <div class="form-group">
+                    <input type="search" name="search-field" value="" placeholder="Search Here" required="">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+        <!-- End Header Search -->
+
+        <!--Scroll to top-->
+        <div class="scroll-to-top scroll-to-target" data-target="html"><span class="fa fa-arrow-up"></span></div>
+
+        <script src="js/jquery.js"></script>
+
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+        <script src="js/jquery.fancybox.js"></script>
+        <script src="js/appear.js"></script>
+        <script src="js/parallax.min.js"></script>
+        <script src="js/tilt.jquery.min.js"></script>
+        <script src="js/jquery.paroller.min.js"></script>
+        <script src="js/owl.js"></script>
+        <script src="js/wow.js"></script>
+        <script src="js/nav-tool.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script src="js/script.js"></script>
+        <script src="js/color-settings.js"></script>
+
+        <!--Google Map APi Key-->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIJ_QKHN-bi6_1C9f5eYE3pZs1zhQIo5o"></script>
+        <script src="js/map-script.js"></script>
+        <!--End Google Map APi-->
+
+    </body>
+
+    <!-- Mirrored from expert-themes.com/html/gym/portfolio-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 15 Apr 2025 10:33:05 GMT -->
+</html>

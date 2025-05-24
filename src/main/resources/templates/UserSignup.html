@@ -4,7 +4,7 @@
     <!-- Mirrored from expert-themes.com/html/gym/account.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 15 Apr 2025 10:33:14 GMT -->
     <head>
         <meta charset="utf-8">
-        <title>Owner Sign Up</title>
+        <title>User Signup</title>
         <!-- Stylesheets -->
         <link href="css/bootstrap.css" rel="stylesheet">
 
@@ -28,23 +28,23 @@
 
         <!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
         <!--[if lt IE 9]><script src="js/respond.js"></script><![endif]-->
-       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
        <script>
     function signup() {
-        var name = document.getElementById("oname").value;
-        var pass = document.getElementById("opassword").value;
-        var email = document.getElementById("oemail").value;
-        var city = document.getElementById("myDropdown").value;
-        var franchise = document.getElementById("franchise").value;
-        var photo = document.getElementById("ophoto").files[0];
+        var name = document.getElementById("uname").value;
+        var pass = document.getElementById("upassword").value;
+        var email = document.getElementById("uemail").value;
+        var phoneno = document.getElementById("uphonenumber").value;
+        var address = document.getElementById("uaddress").value;
+        var photo = document.getElementById("uphoto").files[0];
 
         // ✅ Check for empty fields
-        if (!name || !pass || !email || !city || !franchise || !photo) {
+        if (!name || !pass || !email || !phoneno || !address || !photo) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Empty Fields',
-                text: 'Please fill out all the fields before signing up.'
+                text: 'Please fill in all fields before submitting.'
             });
             return;
         }
@@ -53,11 +53,11 @@
         formdata.append("name", name);
         formdata.append("pass", pass);
         formdata.append("email", email);
-        formdata.append("city", city);
-        formdata.append("franchise", franchise);
+        formdata.append("phoneno", phoneno);
+        formdata.append("address", address);
         formdata.append("photo", photo);
 
-        var url = "/ownersignup";
+        var url = "/usersignup";
         fetch(url, { method: "POST", body: formdata })
             .then(response => response.text())
             .then(ans => renderAsHtml(ans));
@@ -68,39 +68,31 @@
         if (ans === "success") {
             Swal.fire({
                 icon: 'success',
-                title: 'Signup Successful!',
-                text: 'Welcome onboard!'
+                title: 'Signup Successful',
+                text: 'Your account has been created!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "/ownerlogin";
+                    window.location.href = "/userlogin";
                 }
             });
+        } else if (ans === "exists") {
+            Swal.fire({
+                icon: 'info',
+                title: 'Already Registered',
+                text: 'This email is already registered. Try logging in instead.'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Signup Failed',
+                text: 'Something went wrong: ' + ans
+            });
         }
-    }
-
-    function getcities() {
-        var url = "/getcities";
-        fetch(url)
-            .then(response => response.text())
-            .then(ans => renderAsHtml1(ans));
-    }
-
-    function renderAsHtml1(ans) {
-        var mainobj = JSON.parse(ans);
-        var arr = mainobj["ans"];
-        var a = `<select id="myDropdown" name="myDropdown" class="form-select">`;
-        a += `<option selected disabled>-- Select a city --</option>`;
-        for (var i = 0; i < arr.length; i++) {
-            var ct = arr[i];
-            a += `<option value="${ct.id}">${ct.cname}</option>`;
-        }
-        a += `</select>`;
-        document.getElementById("cd1").innerHTML = a;
     }
 </script>
     </head>
 
-    <body class="hidden-bar-wrapper" onload="getcities()">
+    <body class="hidden-bar-wrapper">
 
         <div class="page-wrapper">
 
@@ -343,7 +335,7 @@
                         <div class="form-column column col-lg-12 col-md-12 col-sm-12">
 
                             <div class="sec-title">
-                                <h2>Owner Sign Up</h2>
+                                <h2>User Sign Up</h2>
                                 <div class="separate"></div>
                             </div>
 
@@ -356,20 +348,20 @@
                                     <form method="post" action="https://expert-themes.com/html/gym/index.html" enctype="multipart/form-data">
                                         <!-- Owner Name -->
                                         <div class="mb-3">
-                                            <label for="oname" class="form-label"><i class="fa fa-user me-2"></i>Owner Name</label>
-                                            <input type="text" class="form-control" name="username" id="oname" placeholder="Enter your name *">
+                                            <label for="oname" class="form-label"><i class="fa fa-user me-2"></i>User Name</label>
+                                            <input type="text" class="form-control" name="username" id="uname" placeholder="Enter your name *">
                                         </div>
 
                                         <!-- Owner Email -->
                                         <div class="mb-3">
-                                            <label for="oemail" class="form-label"><i class="fa fa-envelope me-2"></i>Owner Email Address</label>
-                                            <input type="email" class="form-control" name="useremil" id="oemail" placeholder="Enter your email *">
+                                            <label for="oemail" class="form-label"><i class="fa fa-envelope me-2"></i>user Email Address</label>
+                                            <input type="email" class="form-control" name="useremil" id="uemail" placeholder="Enter your email *">
                                         </div>
 
                                         <!-- Password -->
                                         <div class="mb-3">
                                             <label for="opassword" class="form-label"><i class="fa fa-lock me-2"></i>Password</label>
-                                            <input type="password" class="form-control" name="userpassword" id="opassword" placeholder="Enter password *">
+                                            <input type="password" class="form-control" name="userpassword" id="upassword" placeholder="Enter password *">
                                         </div><br>
 <!--
                                          City Text Input 
@@ -378,7 +370,7 @@
                                             <input type="text" class="form-control" name="usercity" id="ocity" placeholder="Type your city name">
                                         </div>-->
 
-                                        <!-- City Dropdown -->
+<!--                                         City Dropdown 
                                         <div class="mb-3" id="cd1">
                                             <label for="myDropdown" class="form-label"><i class="fa fa-map-marker-alt me-2"></i>Choose City from List</label>
                                             <select id="myDropdown" name="myDropdown" class="form-select">
@@ -387,18 +379,23 @@
                                                 <option value="Amritsar">Amritsar</option>
                                                 <option value="Delhi">Delhi</option>
                                             </select>
-                                        </div>
+                                        </div>-->
 
-                                        <!-- Franchise Name -->
+                                        <!-- phone number -->
                                         <br><div class="mb-3">
-                                            <label for="franchise" class="form-label"><i class="fa fa-building me-2"></i>Franchise Name</label>
-                                            <input type="text" class="form-control" name="userfranchise" id="franchise" placeholder="Enter franchise name">
+                                            <label for="phone" class="form-label"><i class="fa fa-building me-2"></i>Phone number</label>
+                                            <input type="text" class="form-control" name="userfranchise" id="uphonenumber" placeholder="Enter phone number">
+                                        </div>
+                                        
+                                         <div class="mb-3">
+                                            <label for="oname" class="form-label"><i class="fa fa-user me-2"></i>address</label>
+                                            <input type="text" class="form-control" name="username" id="uaddress" placeholder="Enter your address *">
                                         </div>
 
                                         <!-- Owner Photo -->
                                         <div class="mb-4">
                                             <label for="ophoto" class="form-label"><i class="fa fa-camera me-2"></i>Upload Owner Photo</label>
-                                            <input type="file" class="form-control" name="f1" id="ophoto">
+                                            <input type="file" class="form-control" name="f1" id="uphoto">
                                         </div>
 
                                           <div class="clearfix">

@@ -4,7 +4,7 @@
     <!-- Mirrored from expert-themes.com/html/gym/account.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 15 Apr 2025 10:33:14 GMT -->
     <head>
         <meta charset="utf-8">
-        <title>Owner Login</title>
+        <title>Edit Owner Details</title>
         <!-- Stylesheets -->
         <link href="css/bootstrap.css" rel="stylesheet">
 
@@ -28,140 +28,110 @@
 
         <!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
         <!--[if lt IE 9]><script src="js/respond.js"></script><![endif]-->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-   <!-- Include SweetAlert2 library -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function updatedetais() {
 
-<script>
-    var otp=0;
-    function login() {
-        var email = document.getElementById("oemail").value;
-        var pass = document.getElementById("opassword").value;
 
-        
-        if (!email || !pass) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Empty Fields',
-                text: 'Please enter both email and password.'
-            });
-        } else {
-            var formdata = new FormData();
-            formdata.append("email", email);
-            formdata.append("pass", pass);
+                var name = document.getElementById("oname").value;
 
-            var url = "/ownerlogin";
-            fetch(url, { method: "POST", body: formdata })
-                .then(response => response.text())
-                .then(ans => renderAsHtml(ans));
-        }
-    }
+                var city = document.getElementById("myDropdown").value;
 
-    function renderAsHtml(ans) {
-        console.log(ans);
-        if (ans === "success") {
-            Swal.fire({
-                icon: 'success',
-                title: 'Login Successful',
-                text: 'Welcome to Owner Dashboard!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "/OwnerHome";
+                var franchise = document.getElementById("franchise").value;
+
+
+                var formdata = new FormData();
+                formdata.append("name", name);
+                formdata.append("city", city);
+                formdata.append("franchise", franchise);
+
+                var url = "/updatedetails";
+                fetch(url, {
+                    method: "POST",
+                    body: formdata
+                })
+                        .then(response => response.text())
+                        .then(ans => renderAsHtml(ans));
+            }
+
+            function renderAsHtml(ans) {
+                if (ans === "Updated Successfully") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Details updated successfully!',
+                        confirmButtonColor: '#3085d6'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: ans,
+                        confirmButtonColor: '#d33'
+                    });
                 }
-            });
-        } else if(ans === "failed"){
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
-                text: 'Incorrect email or password. Please try again.'
-            });
-        }
-        else{
-            alert(ans);
-        }
-    }
-    
-     function forgot()
-            {
-                var email8 = document.getElementById("oemail").value;
-                otp = Math.floor(1000 + Math.random() * 9000);
+            }
 
-                if (!email8)
+
+            function getOwnerData() {
+                var urlParams = new URLSearchParams(window.location.search);
+                var oid = urlParams.get('id');
+
+                var formdata = new FormData();
+                formdata.append("oid", oid);
+
+                var url = "/getEditOwnerData";
+                fetch(url, {
+                    method: "POST", body: formdata})
+                        .then(response => response.text())
+                        .then(ans => renderAsHtml1(ans));
+            }
+
+            function renderAsHtml1(ans) {
+                console.log(ans);
+                var mainobj = JSON.parse(ans);
+                var arr = mainobj["ans"];
+
+                document.getElementById("myDropdown").value = arr[0].ocity;
+                document.getElementById("franchise").value = arr[0].franchise;
+                document.getElementById("oname").value = arr[0].oname;
+//                document.getElementById("ophoto").value = arr[0].ophoto;
+            }
+
+//            document.addEventListener("DOMContentLoaded", function () {
+//                getOwnerData();
+//            });
+
+            function getcities() {
+                fetch("/getcities")
+                        .then(response => response.text())
+                        .then(ans => renderCities(ans));
+            }
+
+            function renderCities(ans) {
+                var mainobj = JSON.parse(ans);
+                var arr = mainobj["ans"];
+                var a = "";
+                a += ` <option selected disabled>-- Select a city --</option>`;
+                for (var i = 0; i < arr.length; i++)
                 {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Enter Email',
-                        text: 'Please Enter Email First'
-                    });
-                } else {
-                    var url = "/oforgot?email=" + email8 + "&otp=" + otp;
-                    fetch(url)
-                            .then(response => response.text())
-                            .then(ans => renderAsHtml5(ans));
-                }
-            }
-
-            function renderAsHtml5(ans) {
-                if (ans === "success") {
-                    Swal.fire({
-                        title: 'Enter OTP',
-                        html:
-                                '<input type="text" id="otpInput" class="swal2-input" placeholder="Enter OTP">' +
-                                '<button onclick="verifyOtpFromModal()" class="swal2-confirm swal2-styled" style="margin-top: 10px;">Verify OTP</button>',
-                        showConfirmButton: false
-                    });
+                    var ct = arr[i];
+                    a += `<option value="${ct.id}">${ct.cname}</option>`;
 
 
-
-
-
-                } else if (ans === "fail") {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Invalid Email',
-                        text: 'Email not registered for User'
-                    });
-                } else {
-                    alert(ans);
-                }
-            }
-
-            function verifyOtpFromModal() {
-                var inp = document.getElementById("otpInput").value;
-                if (otp == inp)
-                {
-                    var email = document.getElementById("oemail").value;
-                    var url = "/ootpverify?email=" + email;
-                    fetch(url)
-                            .then(response => response.text())
-                            .then(ans => {
-                                if (ans === "success")
-                                {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Otp Success',
-                                        text: 'Please Check Your Email for the Password'
-                                    });
-
-                                } else if (ans === "fail")
-                                {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Otp Invalid',
-                                        text: 'Please Check Your Email for the OTP'
-                                    });
-                                }
-                            });
-                } else {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Invalid Otp',
-                        text: 'Please Enter Valid Otp'
-                    });
                 }
 
+
+                document.getElementById("myDropdown").innerHTML = a;
             }
-</script>
+            document.addEventListener("DOMContentLoaded", function () {
+                getOwnerData();
+                getcities();
+            });
+
+
+        </script>
 
     </head>
 
@@ -172,24 +142,23 @@
             <!-- Preloader -->
             <div class="preloader"></div>
 
-           <!-- Main Header-->
+            <!-- Main Header-->
 
             <div th:replace="OwnerHeader :: header"></div>
 
             <!-- End Main Header -->
-
             <!--Page Title-->
             <section class="page-title" style="background-image:url(images/background/11.jpg)">
                 <div class="auto-container">
                     <div class="clearfix">
                         <div class="pull-left">
-                            <h2>Login / Register</h2>
+                            <!--<h2>Owner SignUp</h2>-->
                             <div class="text">Fitness is not a destination it is a way of life.</div>
                         </div>
                         <div class="pull-right">
                             <ul class="page-breadcrumb">
                                 <li><a href="index-2.html">home</a></li>
-                                <li>Login / Register</li>
+                                <li><a href="alogin">Login</li>
                             </ul>
                         </div>
                     </div>
@@ -256,82 +225,124 @@
                         <div class="form-column column col-lg-12 col-md-12 col-sm-12">
 
                             <div class="sec-title">
-                                <h2>Owner Login</h2>
+                                <h2>Edit Owner Details</h2>
                                 <div class="separate"></div>
                             </div>
 
-                            <!--Login Form-->
-                            <div class="styled-form login-form">
-                                <form method="post" action="https://expert-themes.com/html/gym/index.html">
-                                    <div class="mb-3">
-                                            <label for="oemail" class="form-label"><i class="fa fa-envelope me-2"></i>Owner Email Address</label>
-                                            <input type="email" class="form-control" name="useremil" id="oemail" placeholder="Enter your email *">
-                                        </div>
-                                    <!--                            <div class="form-group">
-                                                                    <span class="adon-icon"><span class="fa fa-envelope-o"></span></span>
-                                                                    <input type="email" name="useremil" id="em" value="" placeholder="Emai Address*">
-                                                                </div>-->
-                                    <div class="form-group">
-                                        <span class="adon-icon"><span class="fa fa-unlock-alt"></span></span>
-                                        <input type="password" name="userpassword" id="opassword" value="" placeholder="Enter Password">
-                                    </div>
-                                    <div class="clearfix">
-                                        <div class="form-group pull-left">
-                                            <button type="button" class="theme-btn btn-style-three" onclick="login()"><span class="txt">Login Now</span></button>
+
+
+                            <div class="container mt-5 mb-5">
+                                <div class="card shadow p-4 rounded-4">
+                                    <!--                                    <h3 class="text-center mb-4">Owner Sign Up</h3>-->
+
+                                    <form method="post" action="https://expert-themes.com/html/gym/index.html" enctype="multipart/form-data">
+                                        <!-- Owner Name -->
+                                        <div class="mb-3">
+                                            <label for="oname" class="form-label"><i class="fa fa-user me-2"></i>Owner Name</label>
+                                            <input type="text" class="form-control" name="username" id="oname" placeholder="Enter your name *">
                                         </div>
 
-                                    </div>
-
-                                   <div class="clearfix">
-                                        <div class="pull-left">
-                                            <a href="#" onclick="forgot()">Forgot Password?</a>
-                                        </div>
-                                    </div>
-
-                                </form>
-                            </div>
-
-                        </div>
-
-                        <!--                Form Column
-                                        <div class="form-column column col-lg-6 col-md-12 col-sm-12">
+                                        <!--                                         Owner Email 
+                                                                                <div class="mb-3">
+                                                                                    <label for="oemail" class="form-label"><i class="fa fa-envelope me-2"></i>Owner Email Address</label>
+                                                                                    <input type="email" class="form-control" name="useremil" id="oemail" placeholder="Enter your email *">
+                                                                                </div>
                                         
-                                            <div class="sec-title">
-                                                <h2>Register Here</h2>
-                                                                        <div class="separate"></div>
-                                            </div>
-                                            
-                                            Login Form
-                                            <div class="styled-form register-form">
-                                                <form method="post" action="https://expert-themes.com/html/gym/index.html">
-                                                    <div class="form-group">
-                                                        <span class="adon-icon"><span class="fa fa-user"></span></span>
-                                                        <input type="text" name="username" value="" placeholder="Your Name *">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="adon-icon"><span class="fa fa-envelope-o"></span></span>
-                                                        <input type="email" name="useremil" value="" placeholder="Emai Address*">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <span class="adon-icon"><span class="fa fa-unlock-alt"></span></span>
-                                                        <input type="password" name="userpassword" value="" placeholder="Enter Password">
-                                                    </div>
-                                                    <div class="clearfix">
-                                                        <div class="form-group pull-left">
-                                                            <button type="button" class="theme-btn btn-style-three"><span class="txt">Register here</span></button>
-                                                        </div>
-                                                        <div class="form-group submit-text pull-right">
-                                                                * You must be a free registered to submit content.
-                                                        </div>
-                                                    </div>
-                                                    
-                                                </form>
-                                            </div>
-                                            
+                                                                                 Password 
+                                                                                <div class="mb-3">
+                                                                                    <label for="opassword" class="form-label"><i class="fa fa-lock me-2"></i>Password</label>
+                                                                                    <input type="password" class="form-control" name="userpassword" id="opassword" placeholder="Enter password *">
+                                                                                </div><br>-->
+                                        <!--
+                                                                                 City Text Input 
+                                                                                <div class="mb-3">
+                                                                                    <label for="ocity" class="form-label"><i class="fa fa-city me-2"></i>Enter Your City</label>
+                                                                                    <input type="text" class="form-control" name="usercity" id="ocity" placeholder="Type your city name">
+                                                                                </div>-->
+
+                                        <!-- City Dropdown -->
+                                        <div class="mb-3" id="cd1">
+                                            <label for="myDropdown" class="form-label"><i class="fa fa-map-marker-alt me-2"></i>Choose City from List</label>
+                                            <select id="myDropdown" name="myDropdown" class="form-select">
+                                                <option selected disabled>-- Select a city --</option>
+                                                <option value="Jammu">Jammu</option>
+                                                <option value="Amritsar">Amritsar</option>
+                                                <option value="Delhi">Delhi</option>
+                                            </select>
                                         </div>
-                        -->
+
+                                        <!-- Franchise Name -->
+                                        <br><div class="mb-3">
+                                            <label for="franchise" class="form-label"><i class="fa fa-building me-2"></i>Franchise Name</label>
+                                            <input type="text" class="form-control" name="userfranchise" id="franchise" placeholder="Enter franchise name">
+                                        </div>
+
+                                        <!--                                         Owner Photo 
+                                                                                <div class="mb-4">
+                                                                                    <label for="ophoto" class="form-label"><i class="fa fa-camera me-2"></i>Upload Owner Photo</label>
+                                                                                    <input type="file" class="form-control" name="f1" id="ophoto">
+                                                                                </div>-->
+
+                                        <div class="clearfix">
+                                            <div class="form-group pull-left">
+                                                <button type="button" class="theme-btn btn-style-three" onclick="updatedetais()"><span class="txt">Update Details</span></button>
+                                            </div>
+                                            <!--                                            <div class="form-group social-links-two pull-right">
+                                                                                            Or login with <a href="#" class="img-circle facebook"><span class="fa fa-facebook-f"></span></a> <a href="#" class="img-circle twitter"><span class="fa fa-twitter"></span></a> <a href="#" class="img-circle google-plus"><span class="fa fa-google-plus"></span></a>
+                                                                                        </div>-->
+                                        </div>
+
+
+                                        <!--                                        <div class="clearfix">
+                                                                                    <div class="pull-left">
+                                                                                        <input type="checkbox" id="remember-me"><label class="remember-me" for="remember-me">&nbsp; Remember Me</label>
+                                                                                    </div>
+                                                                                </div>-->
+
+                                    </form>
+                                </div>
+
+                            </div>
+                            <!--                
+                                            Form Column
+                                            <div class="form-column column col-lg-6 col-md-12 col-sm-12">
+                                            
+                                                <div class="sec-title">
+                                                    <h2>Register Here</h2>
+                                                                            <div class="separate"></div>
+                                                </div>
+                                                
+                                                Login Form
+                                                <div class="styled-form register-form">
+                                                    <form method="post" action="https://expert-themes.com/html/gym/index.html">
+                                                        <div class="form-group">
+                                                            <span class="adon-icon"><span class="fa fa-user"></span></span>
+                                                            <input type="text" name="username" value="" placeholder="Your Name *">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="adon-icon"><span class="fa fa-envelope-o"></span></span>
+                                                            <input type="email" name="useremil" value="" placeholder="Emai Address*">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <span class="adon-icon"><span class="fa fa-unlock-alt"></span></span>
+                                                            <input type="password" name="userpassword" value="" placeholder="Enter Password">
+                                                        </div>
+                                                        <div class="clearfix">
+                                                            <div class="form-group pull-left">
+                                                                <button type="button" class="theme-btn btn-style-three"><span class="txt">Register here</span></button>
+                                                            </div>
+                                                            <div class="form-group submit-text pull-right">
+                                                                    * You must be a free registered to submit content.
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    </form>
+                                                </div>
+                                                
+                                            </div>
+                            -->
+                        </div>
                     </div>
-                </div>
             </section>
             <!--End Register Section-->
 

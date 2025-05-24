@@ -4,7 +4,7 @@
     <!-- Mirrored from expert-themes.com/html/gym/account.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 15 Apr 2025 10:33:14 GMT -->
     <head>
         <meta charset="utf-8">
-        <title>Gym HTML-5 Template | Login / Register</title>
+        <title>Admin Manage Cities</title>
         <!-- Stylesheets -->
         <link href="css/bootstrap.css" rel="stylesheet">
 
@@ -28,37 +28,127 @@
 
         <!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
         <!--[if lt IE 9]><script src="js/respond.js"></script><![endif]-->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+            <style>
+  /* News Section Container */
+.news-section .auto-container {
+    padding: 30px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* News Block Styling */
+.news-block {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.news-block .inner-box {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Image Styling */
+.news-block .inner-box .image {
+    width: 100%;
+    height: 220px; /* Uniform height for images */
+    overflow: hidden;
+    position: relative;
+}
+
+.news-block .inner-box .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures images maintain their aspect ratio and cover the container */
+    transition: transform 0.3s ease-in-out;
+}
+
+.news-block .inner-box .image:hover img {
+    transform: scale(1.1); /* Slight zoom effect on hover */
+}
+
+/* Text and Content Styling */
+.news-block .inner-box .lower-content {
+    padding: 15px;
+    text-align: center;
+}
+
+.news-block .inner-box .lower-content h4 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.news-block .inner-box .lower-content .text {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+
+
+/* Responsive Styling */
+@media (max-width: 991px) {
+    .news-block {
+        width: 48%;
+        margin: 1% 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .news-block {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}
+
+</style>
         <script>
-            function Add() {
-            alert("go called");
-            var cname = document.getElementById("cityn").value;
-            var cdesc = document.getElementById("cityd").value;
-            var cphoto = document.getElementById("photo").files[0];
-            var formdata = new FormData();
-            formdata.append("cname", cname);
-            formdata.append("cdesc", cdesc);
-            formdata.append("cphoto", cphoto);
-            var url = "/adminmanagecity";
-            fetch(url, {method: "POST", body: formdata})
-                    .then(response => response.text())
-                    .then(ans => renderAsHtml(ans));
-            alert("hello");
-            }
+  function Add() {
+    var cname = document.getElementById("cityn").value;
+    var cdesc = document.getElementById("cityd").value;
+    var cphoto = document.getElementById("photo").files[0];
 
-            function renderAsHtml(ans) {
-console.log(ans);
-            if (ans === "success")
-            {
-            alert(ans);
-            getcities();
-            }
-            else
-            {
-            alert(ans);
-            }
+    if (!cname || !cdesc || !cphoto) {
+        Swal.fire('Missing Data', 'Please fill in all fields and select a photo.', 'warning');
+        return;
+    }
 
-            }
+    var formdata = new FormData();
+    formdata.append("cname", cname);
+    formdata.append("cdesc", cdesc);
+    formdata.append("cphoto", cphoto);
+
+    var url = "/adminmanagecity";
+
+    fetch(url, { method: "POST", body: formdata })
+        .then(response => response.text())
+        .then(ans => renderAsHtml(ans));
+}
+
+
+
+           function renderAsHtml(ans) {
+   if (ans === "Added Successfully") {
+    Swal.fire(
+        'Success!',
+        'City added successfully.',
+        'success'
+    );
+        getcities();
+    } else {
+        Swal.fire(
+            'Error!',
+            ans,
+            'error'
+        );
+    }
+}
+
 
 
 
@@ -67,9 +157,9 @@ console.log(ans);
             var url = "/getcities";
             fetch(url)
                     .then(response => response.text())
-                    .then(ans => renderAsHtml(ans));
+                    .then(ans => renderAsHtml1(ans));
             }
-            function renderAsHtml(ans)
+            function renderAsHtml1(ans)
             {
             console.log(ans);
             var mainobj = JSON.parse(ans);
@@ -111,23 +201,42 @@ console.log(ans);
                 
             }
              
-   function deletecity(id) {
-    if (confirm("Are you sure you want to delete this city?")) {
-        var formdata = new FormData();
-        formdata.append("id", id);
+  function deletecity(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This city will be permanently deleted!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var formdata = new FormData();
+            formdata.append("id", id);
 
-        fetch("/deletecity", {method: "POST",body: formdata})
-        .then(response => response.text())
-        .then(ans => {
-            if (ans === "success") {
-                alert("City deleted successfully.");
-                getcities();  
-            } else {
-                alert("Error deleting city: " + ans);
-            }
-        });
-    }
+            fetch("/deletecity", { method: "POST", body: formdata })
+                .then(response => response.text())
+                .then(ans => {
+                    if (ans === "success") {
+                        Swal.fire(
+                            'Deleted!',
+                            'City deleted successfully.',
+                            'success'
+                        );
+                        getcities(); // Refresh list
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete city: ' + ans,
+                            'error'
+                        );
+                    }
+                });
+        }
+    });
 }
+
 
         </script>
 
@@ -140,162 +249,8 @@ console.log(ans);
             <!-- Preloader -->
             <div class="preloader"></div>
 
-            <!-- Main Header-->
-            <header class="main-header header-style-two">
-
-                <!-- Header Top -->
-                <div class="header-top">
-                    <div class="auto-container">
-                        <div class="clearfix">
-
-                            <!-- Top Left -->
-                            <div class="top-left pull-left">
-                                <!-- Info List -->
-                                <ul class="info-list">
-                                    <li><span class="icon fa fa-location-arrow"></span> 27 Division St, New York, USA</li>
-                                    <li><span class="icon fa fa-phone"></span> <a href="tel:+1-044-123-456-789"> +1 (044) 123 456 789</a></li>
-                                    <li><span class="icon fa fa-envelope-o"></span> <a href="mailto:info@example.com"> info@example.com</a></li>
-                                </ul>
-                            </div>
-
-                            <!-- Top Right -->
-                            <div class="top-right pull-right">
-
-                                <!--Language-->
-                                <div class="language dropdown"><a class="btn btn-default dropdown-toggle" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#"><span class="flag-icon fa fa-globe"></span>EN &nbsp;<span class="icon fa fa-angle-down"></span></a>
-                                    <ul class="dropdown-menu style-one" aria-labelledby="dropdownMenu2">
-                                        <li><a href="#">English</a></li>
-                                        <li><a href="#">German</a></li>
-                                        <li><a href="#">Arabic</a></li>
-                                        <li><a href="#">Hindi</a></li>
-                                    </ul>
-                                </div>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Header Upper -->
-                <div class="header-upper">
-                    <div class="auto-container clearfix">
-
-                        <div class="pull-left logo-box">
-                            <div class="logo"><a href="index-2.html"><img src="images/logo.png" alt="" title=""></a></div>
-                        </div>
-
-                        <div class="nav-outer clearfix">
-                            <!--Mobile Navigation Toggler-->
-                            <div class="mobile-nav-toggler"><span class="icon flaticon-menu"></span></div>
-                            <!-- Main Menu -->
-                            <nav class="main-menu navbar-expand-md">
-                                <div class="navbar-header">
-                                    <!-- Toggle Button -->    	
-                                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                                        <span class="icon-bar"></span>
-                                        <span class="icon-bar"></span>
-                                        <span class="icon-bar"></span>
-                                    </button>
-                                </div>
-
-                                <div class="navbar-collapse collapse clearfix" id="navbarSupportedContent">
-                                    <ul class="navigation clearfix">
-                                        <li class="dropdown"><a href="#">Home</a>
-                                            <ul>
-                                                <li><a href="index-2.html">Home Page 01</a></li>
-                                                <li><a href="index-3.html">Home Page 02</a></li>
-                                                <li><a href="index-4.html">Home Page 03</a></li>
-                                                <li class="dropdown"><a href="#">Header Styles</a>
-                                                    <ul>
-                                                        <li><a href="index-2.html">Header Style 01</a></li>
-                                                        <li><a href="index-3.html">Header Style 02</a></li>
-                                                        <li><a href="index-4.html">Header Style 03</a></li>
-                                                    </ul>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                        <li class="dropdown"><a href="#">About</a>
-                                            <ul>
-                                                <li><a href="about.html">About Us</a></li>
-                                                <li><a href="faq.html">Faq</a></li>
-                                                <li><a href="price.html">Price</a></li>
-                                                <li><a href="team.html">Team</a></li>
-                                                <li><a href="time-table.html">Time Table</a></li>
-                                                <li><a href="testimonial.html">Testimonial</a></li>
-                                                <li><a href="comming-soon.html">Comming Soon</a></li>
-                                            </ul>
-                                        </li>
-                                        <li class="dropdown"><a href="#">Classes</a>
-                                            <ul>
-                                                <li><a href="classes.html">Classes</a></li>
-                                                <li><a href="classes-detail.html">Classes Detail</a></li>
-                                            </ul>
-                                        </li>
-                                        <li class="dropdown"><a href="#">Portfolio</a>
-                                            <ul>
-                                                <li><a href="portfolio.html">Portfolio</a></li>
-                                                <li><a href="portfolio-detail.html">Portfolio Detail</a></li>
-                                            </ul>
-                                        </li>
-                                        <li class="current dropdown"><a href="#">Shop</a>
-                                            <ul>
-                                                <li><a href="shop.html">Our Products</a></li>
-                                                <li><a href="shop-single.html">Product Single</a></li>
-                                                <li><a href="shopping-cart.html">Shopping Cart</a></li>
-                                                <li><a href="checkout.html">Checkout</a></li>
-                                                <li><a href="Adminlogin.html">Account</a></li>
-                                            </ul>
-                                        </li>
-                                        <li class="dropdown"><a href="#">Blog</a>
-                                            <ul>
-                                                <li><a href="blog.html">Our Blog</a></li>
-                                                <li><a href="blog-single.html">Blog Single</a></li>
-                                                <li><a href="not-found.html">Not Found</a></li>
-                                            </ul>
-                                        </li>
-                                        <li><a href="contact.html">Contact us</a></li>
-                                    </ul>
-                                </div>
-                            </nav>
-
-                        </div>
-
-                    </div>
-                </div>
-                <!--End Header Upper-->
-
-                <!-- Sticky Header  -->
-                <div class="sticky-header">
-                    <div class="auto-container clearfix">
-                        <!--Logo-->
-                        <div class="logo pull-left">
-                            <a href="index-2.html" title=""><img src="images/logo-small.png" alt="" title=""></a>
-                        </div>
-                        <!--Right Col-->
-                        <div class="pull-right">
-                            <!-- Main Menu -->
-                            <nav class="main-menu">
-                                <!--Keep This Empty / Menu will come through Javascript-->
-                            </nav><!-- Main Menu End-->
-
-                        </div>
-                    </div>
-                </div><!-- End Sticky Menu -->
-
-                <!-- Mobile Menu  -->
-                <div class="mobile-menu">
-                    <div class="menu-backdrop"></div>
-                    <div class="close-btn"><span class="icon flaticon-multiply"></span></div>
-
-                    <nav class="menu-box">
-                        <div class="nav-logo"><a href="index-2.html"><img src="images/logo-2.png" alt="" title=""></a></div>
-                        <div class="menu-outer"><!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header--></div>
-                    </nav>
-                </div>
-                <!-- End Mobile Menu -->
-
-            </header>
+          <!-- Main Header-->
+            <div th:replace="AdminHeader :: aheader"></div>
             <!-- End Main Header -->
 
             <!--Page Title-->
@@ -398,8 +353,13 @@ console.log(ans);
                                     <div class="form-group">
                                         <span class="adon-icon"></span>
                                         <label>City Description</label>
-                                        <input type="text" name="citydescription" id="cityd" value="" placeholder="City Description">
+                                        <textarea name="citydescription" id="cityd" value="" placeholder="City Description"></textarea>
                                     </div>
+                                    
+<!--                                    <div class="form-group col-12">
+                                        <label>City Description</label>
+                                        <textarea name="amenities" id="ameneties" rows="4" placeholder="e.g., abc, def, ghi " class="form-control"></textarea>
+                                    </div>-->
 
                                     <div class="clearfix">
                                         <div class="form-group pull-left">

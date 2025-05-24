@@ -4,7 +4,7 @@
     <!-- Mirrored from expert-themes.com/html/gym/account.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 15 Apr 2025 10:33:14 GMT -->
     <head>
         <meta charset="utf-8">
-        <title>Owner Home</title>
+        <title>User Login</title>
         <!-- Stylesheets -->
         <link href="css/bootstrap.css" rel="stylesheet">
 
@@ -28,8 +28,155 @@
 
         <!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
         <!--[if lt IE 9]><script src="js/respond.js"></script><![endif]-->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-      
+        <script>
+            var otp=0;
+            function login() {
+                var pass = document.getElementById("upassword").value;
+                var email = document.getElementById("uemail").value;
+
+                // Check for empty fields
+                if (!email || !pass) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Empty Fields',
+                        text: 'Please fill in both email and password.'
+                    });
+                    return;
+                }
+
+                var formdata = new FormData();
+                formdata.append("pass", pass);
+                formdata.append("email", email);
+
+                var url = "/userlogin";
+                fetch(url, {method: "POST", body: formdata})
+                        .then(response => response.text())
+                        .then(ans => renderAsHtml(ans));
+            }
+
+            function renderAsHtml(ans) {
+                console.log(ans);
+                if (ans === "success") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Successful',
+                        text: 'Welcome back!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/";
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Failed',
+                        text: 'Incorrect email or password.'
+                    });
+                }
+            }
+
+            function forgot()
+            {
+                var email8 = document.getElementById("uemail").value;
+                otp = Math.floor(1000 + Math.random() * 9000);
+
+                if (!email8)
+                {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Enter Email',
+                        text: 'Please Enter Email First'
+                    });
+                } else {
+                    var url = "/forgot?email=" + email8 + "&otp=" + otp;
+                    fetch(url)
+                            .then(response => response.text())
+                            .then(ans => renderAsHtml5(ans));
+                }
+            }
+
+            function renderAsHtml5(ans) {
+                if (ans === "success") {
+                    Swal.fire({
+                        title: 'Enter OTP',
+                        html:
+                                '<input type="text" id="otpInput" class="swal2-input" placeholder="Enter OTP">' +
+                                '<button onclick="verifyOtpFromModal()" class="swal2-confirm swal2-styled" style="margin-top: 10px;">Verify OTP</button>',
+                        showConfirmButton: false
+                    });
+
+
+
+
+
+                } else if (ans === "fail") {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Email',
+                        text: 'Email not registered for User'
+                    });
+                } else {
+                    alert(ans);
+                }
+            }
+
+            function verifyOtpFromModal() {
+                var inp = document.getElementById("otpInput").value;
+                if (otp == inp)
+                {
+                    var email = document.getElementById("uemail").value;
+                    var url = "/otpverify?email=" + email;
+                    fetch(url)
+                            .then(response => response.text())
+                            .then(ans => {
+                                if (ans === "success")
+                                {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Otp Success',
+                                        text: 'Please Check Your Email for the Password'
+                                    });
+
+                                } else if (ans === "fail")
+                                {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Otp Invalid',
+                                        text: 'Please Check Your Email for the OTP'
+                                    });
+                                }
+                            });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Otp',
+                        text: 'Please Enter Valid Otp'
+                    });
+                }
+
+            }
+        </script>
+        <script>
+        //    function sendmail()
+        //            {
+        //                    var url="/sendemail";
+        //                fetch(url)
+        //                        .then(response => response.text())
+        //                        .then(ans => renderAsHtml5(ans));
+        //            }
+        //            function renderAsHtml5(ans)
+        //            {
+        //                alert(ans);
+        //            }
+        //            
+        //             document.addEventListener("DOMContentLoaded", function () {
+        //
+        //               sendmail();
+        //            });
+        //    </script>
+
 
     </head>
 
@@ -40,24 +187,24 @@
             <!-- Preloader -->
             <div class="preloader"></div>
 
-             <!-- Main Header-->
+         <!-- Main Header-->
 
-            <div th:replace="OwnerHeader :: header"></div>
+            <div th:replace="UserHeader :: header"></div>
 
             <!-- End Main Header -->
 
             <!--Page Title-->
             <section class="page-title" style="background-image:url(images/background/11.jpg)">
-<!--                <div class="auto-container">
+                <div class="auto-container">
                     <div class="clearfix">
                         <div class="pull-left">
                             <h2>Login / Register</h2>
                             <div class="text">Fitness is not a destination it is a way of life.</div>
-                        </div>-->
+                        </div>
                         <div class="pull-right">
                             <ul class="page-breadcrumb">
-<!--                                <li><a href="index-2.html">home</a></li>
-                                <li>Login / Register</li>-->
+                                <li><a href="index-2.html">home</a></li>
+                                <li>Login / Register</li>
                             </ul>
                         </div>
                     </div>
@@ -65,7 +212,7 @@
             </section>
             <!--End Page Title-->
 
-             <!--Sidebar Cart Item--> 
+            <!-- Sidebar Cart Item -->
             <div class="xs-sidebar-group info-group">
                 <div class="xs-overlay xs-bg-black"></div>
                 <div class="xs-sidebar-widget">
@@ -77,7 +224,7 @@
                         </div>
                         <div class="sidebar-textwidget">
 
-                             <!--Sidebar Info Content--> 
+                            <!-- Sidebar Info Content -->
                             <div class="sidebar-info-contents">
                                 <div class="content-inner">
                                     <div class="logo">
@@ -97,7 +244,7 @@
                                             <li><span class="icon fa fa-clock-o"></span>Week Days: 09.00 to 18.00 Sunday: Closed</li>
                                         </ul>
                                     </div>
-                                     Social Box 
+                                    <!-- Social Box -->
                                     <ul class="social-box">
                                         <li class="facebook"><a href="#" class="fa fa-facebook-f"></a></li>
                                         <li class="twitter"><a href="#" class="fa fa-twitter"></a></li>
@@ -112,131 +259,135 @@
                     </div>
                 </div>
             </div>
-             <!--END sidebar widget item--> 
- 
-	<!-- News Section -->
+            <!-- END sidebar widget item -->
 
-	<section class="news-section">
 
-		<div class="auto-container">
+            <!--Register Section-->
+            <section class="register-section">
+                <div class="auto-container">
+                    <div class="row clearfix">
 
-			<!-- Sec Title -->
-<!--
-			<div class="sec-title centered">
+                        <!--Form Column-->
+                        <div class="form-column column col-lg-12 col-md-12 col-sm-12">
 
-				<div class="title">Our Blog & Artical</div>
+                            <div class="sec-title">
+                                <h2>User Login</h2>
+                                <div class="separate"></div>
+                            </div>
 
-				<h2>Latest News <br> Posts</h2>
+                            <!--Login Form-->
+                            <div class="styled-form login-form">
+                                <form method="post" action="https://expert-themes.com/html/gym/index.html">
+                                    <div class="mb-3">
+                                        <label for="uemail" class="form-label"><i class="fa fa-envelope me-2"></i>User Email Address</label>
+                                        <input type="email" class="form-control" name="useremil" id="uemail" placeholder="Enter your email">
+                                    </div>
+                                    <!--                            <div class="form-group">
+                                                                    <span class="adon-icon"><span class="fa fa-envelope-o"></span></span>
+                                                                    <input type="email" name="useremil" id="em" value="" placeholder="Emai Address*">
+                                                                </div>-->
+                                    <div class="form-group">
+                                        <span class="adon-icon"><span class="fa fa-unlock-alt"></span></span>
+                                        <input type="password" name="userpassword" id="upassword" value="" placeholder="Enter Password">
+                                    </div>
+                                    <div class="clearfix">
+                                        <div class="form-group pull-left">
+                                            <button type="button" class="theme-btn btn-style-three" onclick="login()"><span class="txt">Login Now</span></button>
+                                        </div>
 
-			</div>-->
+                                    </div>
 
-			
+                                    <div class="clearfix">
+                                        <div class="pull-left">
+                                            <a href="#" onclick="forgot()">Forgot Password?</a>
+                                        </div>
+                                    </div>
 
-			<div class="row clearfix">
 
-				
+                                </form>
+                            </div>
 
-				<!-- News Block -->
+                        </div>
 
-				<div class="news-block col-lg-6 col-md-6 col-sm-12">
+                        <!--                Form Column
+                                        <div class="form-column column col-lg-6 col-md-12 col-sm-12">
+                                        
+                                            <div class="sec-title">
+                                                <h2>Register Here</h2>
+                                                                        <div class="separate"></div>
+                                            </div>
+                                            
+                                            Login Form
+                                            <div class="styled-form register-form">
+                                                <form method="post" action="https://expert-themes.com/html/gym/index.html">
+                                                    <div class="form-group">
+                                                        <span class="adon-icon"><span class="fa fa-user"></span></span>
+                                                        <input type="text" name="username" value="" placeholder="Your Name *">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="adon-icon"><span class="fa fa-envelope-o"></span></span>
+                                                        <input type="email" name="useremil" value="" placeholder="Emai Address*">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="adon-icon"><span class="fa fa-unlock-alt"></span></span>
+                                                        <input type="password" name="userpassword" value="" placeholder="Enter Password">
+                                                    </div>
+                                                    <div class="clearfix">
+                                                        <div class="form-group pull-left">
+                                                            <button type="button" class="theme-btn btn-style-three"><span class="txt">Register here</span></button>
+                                                        </div>
+                                                        <div class="form-group submit-text pull-right">
+                                                                * You must be a free registered to submit content.
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </form>
+                                            </div>
+                                            
+                                        </div>
+                        -->
+                    </div>
+                </div>
+            </section>
+            <!--End Register Section-->
 
-					<div class="inner-box wow fadeInLeft" data-wow-delay="0ms" data-wow-duration="1500ms">
+            <!-- Subscribe Section -->
+            <section class="subscribe-section">
+                <div class="auto-container">
+                    <div class="inner-container margin-bottom">
+                        <div class="pattern-layer" style="background-image:url(images/background/7.jpg)"></div>
+                        <div class="section-image" style="background-image:url(images/resource/newslatter.png)"></div>
+                        <div class="row clearfix">
 
-						<div class="image">
+                            <!-- Title Column -->
+                            <div class="title-column col-lg-6 col-md-12 col-sm-12">
+                                <div class="inner-column">
+                                    <h3>Don’t miss any updates <br> Get subscribed!</h3>
+                                </div>
+                            </div>
 
-							<a href="/oManageGym"><img src="images/resource/news-1.jpg" alt="" /></a>
+                            <!-- Form Column -->
+                            <div class="form-column col-lg-6 col-md-12 col-sm-12">
+                                <div class="inner-column">
 
-<!--							<div class="post-date">21<span>JUN</span></div>-->
+                                    <div class="newsletter-form">
+                                        <form method="post" action="https://expert-themes.com/html/gym/contact.html">
+                                            <div class="form-group">
+                                                <input type="email" name="email" value="" placeholder="Add your email ......" required="">
+                                                <button type="submit" class="theme-btn submit-btn"><span class="txt">Subscribe</span></button>
+                                            </div>
+                                        </form>
+                                    </div>
 
-						</div>
+                                </div>
+                            </div>
 
-						<div class="lower-content">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- End Subscribe Section -->
 
-							<h4><a href="/oManageGym">Gyms Manage By Owner</a></h4>
-
-							<div class="text">Owners have full control over gym operations,member management,trainer assignments and scheduling</div>
-
-							<div class="btn-three-outer"><a href="/oManageGym" class="theme-btn btn-style-three"><span class="txt">Read More</span></a></div>
-
-						</div>
-
-					</div>
-
-				</div>
-
-				
-
-				<!-- News Block -->
-
-				<div class="news-block col-lg-6 col-md-6 col-sm-12">
-
-					<div class="inner-box wow fadeInUp" data-wow-delay="0ms" data-wow-duration="1500ms">
-
-						<div class="image">
-
-							<a href="/addedgyms"><img src="images/resource/news-2.jpg" alt="" /></a>
-
-<!--							<div class="post-date">25<span>mar</span></div>-->
-
-						</div>
-
-						<div class="lower-content">
-
-							<h4><a href="/addedgyms">Gym Added By Owner</a></h4>
-
-							<div class="text">Owners can add new gyms to the system with complete details and location.</div>
-
-							<div class="btn-three-outer"><a href="/addedgyms" class="theme-btn btn-style-three"><span class="txt">Read More</span></a></div>
-
-						</div>
-
-					</div>
-
-				</div>
-
-				
-
-				<!-- News Block -->
-
-<!--				<div class="news-block col-lg-4 col-md-6 col-sm-12">
-
-					<div class="inner-box wow fadeInRight" data-wow-delay="0ms" data-wow-duration="1500ms">
-
-						<div class="image">
-
-							<a href="blog-single.html"><img src="images/resource/news-3.jpg" alt="" /></a>
-
-							<div class="post-date">18<span>sep</span></div>
-
-						</div>
-
-						<div class="lower-content">
-
-							<h4><a href="blog-single.html">GIVE YOUR FITNESS A BOOST WITH OUR GYM CHALLENGE</a></h4>
-
-							<div class="text">at vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis accusamus et </div>
-
-							<div class="btn-three-outer"><a href="blog-single.html" class="theme-btn btn-style-three"><span class="txt">Read More</span></a></div>
-
-						</div>
-
-					</div>
-
-				</div>-->
-
-				
-
-			</div>
-
-			
-
-		</div>
-
-	</section>
-
-	<!-- End News Section -->
-
-	
             <!-- Main Footer -->
             <footer class="main-footer style-four" style="background-image:url(images/background/2.jpg)">
                 <div class="auto-container">

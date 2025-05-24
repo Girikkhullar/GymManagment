@@ -5,11 +5,13 @@
 package com.girik.project.gymwebsite.Gymwebsiteproject.gymcontrollers;
 
 //import com.example.Gym.GymManagement.Vmm.DbLoader;
+import com.girik.project.gymwebsite.Gymwebsiteproject.Controllers.EmailSenderService;
 import com.girik.project.gymwebsite.Gymwebsiteproject.Vmm.DbLoader;
 import com.girik.project.gymwebsite.Gymwebsiteproject.Vmm.RDBMS_TO_JSON;
 import jakarta.servlet.http.HttpSession;
 import java.io.FileOutputStream;
 import java.sql.ResultSet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class GymRestcontrollers {
+     @Autowired
+    public EmailSenderService email;
 
     @PostMapping("/ownersignup")
     public String ownersignup(@RequestParam String name, @RequestParam String pass, @RequestParam String email, @RequestParam String city, @RequestParam String franchise, @RequestParam MultipartFile photo) {
@@ -61,6 +65,7 @@ public class GymRestcontrollers {
             ResultSet rs = DbLoader.executeQuery("Select * from  ownersignup where oemail = '" + email + "' and opassword = '" + pass + "' ");
             if (rs.next()) {
                 session.setAttribute("id", rs.getInt("id"));
+                session.setAttribute("owneremail" , email);
                 return "success";
             } else {
                 return "failed";
@@ -225,5 +230,102 @@ return ex.toString();
             return ex.toString();
         }
     }
+    @PostMapping("/getEditOwnerData")
+    public String getEditOwnerData(HttpSession session) {
+        Integer oid=(Integer) session.getAttribute("id");
+        String ans = new RDBMS_TO_JSON().generateJSON("select * from ownersignup where id ="+oid+" ");
+        return ans;
+    }
+         
     
+     @PostMapping("/updatedetails")
+    public String updatedetails(
+            
+             @RequestParam String name,
+             @RequestParam String city,
+             @RequestParam String franchise,
+             
+             HttpSession session) {
+
+        try {
+            Integer oid=(Integer) session.getAttribute("id");
+            ResultSet rs = DbLoader.executeQuery("select * from ownersignup where id='" + oid + "'");
+            if (rs.next()) {
+                
+                 rs.moveToCurrentRow();
+                rs.updateString("oname", name);
+                rs.updateString("ocity", city);
+                rs.updateString("franchise", franchise);
+//                rs.updateString("ophoto" , photo);
+              rs.updateRow();
+                return "Updated Successfully";
+            } else {
+               return "fail";
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ex.toString();
+        }
+    }
+    @PostMapping("/dochangeownerPassword")
+    public String dochangeownerPassword(HttpSession session , @RequestParam String oldPass, @RequestParam String newPass) {
+        String ownerdetail = (String) session.getAttribute("owneremail");
+    try {
+       
+        ResultSet rs = DbLoader.executeQuery("SELECT * FROM ownersignup WHERE oemail='" + ownerdetail + "' AND opassword='" + oldPass + "'");
+        if (rs.next()) {
+           rs.updateString("opassword", newPass);  
+            rs.updateRow();
+             return "success";
+    } else {
+      return "fail";
+        }
+  }catch (Exception ex) {
+        ex.printStackTrace();
+            return ex.toString();     
+    }
+    }
+    @GetMapping("/oforgot")
+    public String forgot(@RequestParam String email, @RequestParam String otp) {
+        try {
+            ResultSet rs = DbLoader.executeQuery("select * from ownersignup where oemail='" + email + "'");
+            if (rs.next()) {
+                String body = "Your otp for login page is =" + otp;
+                String subject = "Login Authntication";
+                this.email.sendSimpleEmail(email, body, subject);
+                return "success";
+            } else {
+                return "fail";
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ex.toString();
+        }
+    }
+
+    @GetMapping("/ootpverify")
+    public String otpverify(@RequestParam String email) {
+        try {
+            ResultSet rs = DbLoader.executeQuery("select * from ownersignup where oemail='" + email + "'");
+            if (rs.next()) {
+                rs.moveToCurrentRow();
+                String pass = rs.getString("opassword");
+                String subject = "Your Account Password - JC Pawfect";
+                String body = "Dear User,\n\n"
+                        + "As per your request, here is your account password:\n\n"
+                        + "Password: " + pass + "\n\n"
+                        + "Please do not share this password with anyone.\n"
+                        + "We recommend changing your password after login for better security.\n\n"
+                        + "Regards,\n"
+                        + "JC Pawfect Team";
+                this.email.sendSimpleEmail(email, body, subject);
+                return "success";
+            } else {
+                return "fail";
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ex.toString();
+        }
+    }
 }
